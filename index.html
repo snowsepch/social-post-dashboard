@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>社群貼文洞察｜iPhone 拍照修圖延伸全方位</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.13/dist/html-to-image.js"></script>
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+<style>
+  :root{
+    --bg:#ffffff; --soft:#fafafa; --softer:#f4f4f5;
+    --text:#18181b; --muted:#71717a; --faint:#a1a1aa;
+    --line:#ececec; --line2:#e4e4e7; --line3:#d4d4d8;
+    --accent:#2563eb; --accent-soft:#eff4ff;
+    --hi:#18181b;
+    --radius:12px; --radius-sm:8px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:"Inter","Noto Sans TC",-apple-system,system-ui,sans-serif;
+    font-weight:400; line-height:1.55; letter-spacing:-.003em;
+    padding:0 0 96px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:900px; margin:0 auto; padding:0 24px;}
+  ::selection{background:var(--accent-soft);}
+
+  /* HEADER */
+  header.top{padding:56px 0 30px;}
+  .ey{font-size:12.5px; font-weight:500; color:var(--accent); letter-spacing:.01em;}
+  h1{font-size:clamp(26px,3.6vw,36px); font-weight:700; line-height:1.12; margin:10px 0 14px; letter-spacing:-.02em;}
+  .sub{color:var(--muted); font-size:15px; max-width:62ch;}
+  .stats{display:flex; gap:28px; margin-top:22px; flex-wrap:wrap;}
+  .stat .n{font-size:22px; font-weight:700; letter-spacing:-.02em;}
+  .stat .l{font-size:12px; color:var(--faint); margin-top:1px;}
+  .src{margin-top:20px; font-size:12.5px; color:var(--faint); line-height:1.7; border-left:2px solid var(--line2); padding-left:12px;}
+
+  /* CONTROLS */
+  .controls{position:sticky; top:0; z-index:20; background:rgba(255,255,255,.86); backdrop-filter:saturate(180%) blur(10px); -webkit-backdrop-filter:saturate(180%) blur(10px); border-bottom:1px solid var(--line); padding:14px 0;}
+  .controls-inner{max-width:900px; margin:0 auto; padding:0 24px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+  .search{flex:1; min-width:240px; display:flex; align-items:center; gap:9px; background:var(--soft); border:1px solid var(--line2); border-radius:var(--radius-sm); padding:0 13px; height:42px;}
+  .search:focus-within{border-color:var(--accent); background:#fff; box-shadow:0 0 0 3px var(--accent-soft);}
+  .search .mg{width:15px; height:15px; flex:none; border:2px solid var(--faint); border-radius:50%; position:relative;}
+  .search .mg::after{content:""; position:absolute; width:6px; height:2px; background:var(--faint); right:-4px; bottom:-1px; transform:rotate(45deg); border-radius:2px;}
+  .search input{flex:1; border:0; outline:0; background:transparent; font:inherit; font-size:15px; color:var(--text);}
+  .search input::placeholder{color:var(--faint);}
+  .sel{position:relative;}
+  .sel select{appearance:none; -webkit-appearance:none; font:inherit; font-size:14px; font-weight:500; color:var(--text); background:var(--soft); border:1px solid var(--line2); border-radius:var(--radius-sm); height:42px; padding:0 34px 0 14px; cursor:pointer;}
+  .sel select:focus{outline:0; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft);}
+  .sel::after{content:""; position:absolute; right:14px; top:50%; width:7px; height:7px; border-right:2px solid var(--muted); border-bottom:2px solid var(--muted); transform:translateY(-70%) rotate(45deg); pointer-events:none;}
+  .reset{height:42px; padding:0 14px; font:inherit; font-size:13.5px; font-weight:500; color:var(--muted); background:transparent; border:1px solid var(--line2); border-radius:var(--radius-sm); cursor:pointer;}
+  .reset:hover{color:var(--text); border-color:var(--line3);}
+
+  .toprow{display:flex; align-items:center; justify-content:space-between; gap:12px; margin:26px 0 8px;}
+  .resultline{font-size:12.5px; color:var(--faint);}
+  .btn-sm{height:34px; padding:0 14px; font:inherit; font-size:12.5px; font-weight:500; color:var(--muted); background:transparent; border:1px solid var(--line2); border-radius:var(--radius-sm); cursor:pointer; white-space:nowrap;}
+  .btn-sm:hover{color:var(--text); border-color:var(--line3);}
+
+  /* GROUP (accordion) */
+  .grp{border-top:1px solid var(--line); --c:#2563eb; --cs:#eef3ff;}
+  .grp[hidden]{display:none;}
+  .grp summary{list-style:none; cursor:pointer; display:flex; align-items:center; gap:12px; padding:15px 12px; user-select:none; border-radius:10px; transition:background .15s;}
+  .grp summary:hover{background:var(--soft);}
+  .grp summary::-webkit-details-marker{display:none;}
+  .grp summary:hover{background:var(--cs);}
+  .grp[open]>summary{background:var(--cs);}
+  .grp summary:hover .grp-name{color:var(--c);}
+  .grp[open] .grp-name{color:var(--c);}
+  .chev{width:9px; height:9px; border-right:2px solid var(--faint); border-bottom:2px solid var(--faint); transform:rotate(-45deg); transition:transform .22s ease; flex:none; margin-right:2px;}
+  .grp summary .chev{border-color:var(--c);}
+  .grp[open] .chev{transform:rotate(45deg);}
+  .grp-name{font-size:16px; font-weight:600; letter-spacing:-.01em; transition:color .15s;}
+  .grp-count{font-size:12px; color:var(--c); background:var(--cs); font-weight:600; padding:2px 10px; border-radius:20px;}
+  .grp-bar{flex:1; height:1px;}
+  .grp-hi{font-size:11px; font-weight:600; color:#fff; background:var(--c); padding:2px 9px; border-radius:20px;}
+
+  .grp-body{padding:6px 4px 22px 23px; display:grid; grid-template-columns:repeat(2,1fr); gap:14px;}
+  @media(max-width:680px){.grp-body{grid-template-columns:1fr; padding-left:6px;}}
+  @media(prefers-reduced-motion:no-preference){
+    .grp[open] .grp-body{animation:slidein .26s ease;}
+    @keyframes slidein{from{opacity:0; transform:translateY(-4px);} to{opacity:1; transform:none;}}
+  }
+
+  /* POST CARD = 貼文預覽卡 */
+  .post{background:#fff; border:1px solid var(--line2); border-radius:var(--radius); overflow:hidden; display:flex; flex-direction:column; box-shadow:0 1px 2px rgba(24,24,27,.04); transition:box-shadow .18s, border-color .18s, transform .18s;}
+  .post:hover{border-color:var(--line3); box-shadow:0 8px 26px rgba(24,24,27,.10); transform:translateY(-2px);}
+  .post[hidden]{display:none;}
+  /* 預覽圖（分類色） */
+  .preview{position:relative; background:var(--c); background-image:radial-gradient(circle at 86% 16%, rgba(255,255,255,.22), transparent 48%); color:#fff; padding:15px 16px 17px; min-height:120px; display:flex; flex-direction:column; gap:10px;}
+  .pv-top{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .pv-brand{font-size:11px; font-weight:500; opacity:.92; letter-spacing:.02em;}
+  .pv-title{font-size:19px; font-weight:700; line-height:1.3; letter-spacing:-.01em; margin-top:auto; text-shadow:0 1px 2px rgba(0,0,0,.08);}
+  .preview .badge.hi{background:#fff; color:var(--c);}
+  .preview .badge.mid{background:rgba(255,255,255,.18); color:#fff; border:1px solid rgba(255,255,255,.45);}
+  .post-body{padding:14px 16px 14px; display:flex; flex-direction:column;}
+  .post-body .post-meta{margin-top:0;}
+  .post-top{display:flex; align-items:flex-start; gap:10px;}
+  .post-title{font-size:15px; font-weight:600; line-height:1.4; letter-spacing:-.01em; flex:1;}
+  .badge{font-size:10.5px; font-weight:600; padding:3px 9px; border-radius:20px; white-space:nowrap; flex:none; margin-top:1px;}
+  .badge.hi{background:var(--c); color:#fff;}
+  .badge.mid{background:transparent; color:var(--muted); border:1px solid var(--line3);}
+  .post-meta{font-size:12px; color:var(--faint); margin-top:6px; line-height:1.5;}
+  .caption{white-space:pre-wrap; font-size:13px; line-height:1.72; color:var(--text); background:var(--soft); border:1px solid var(--line); border-radius:var(--radius-sm); padding:13px 14px; margin-top:11px;}
+  .seg{display:inline-flex; background:var(--softer); border:1px solid var(--line2); border-radius:8px; padding:2px; margin-top:11px;}
+  .seg-b{font:inherit; font-size:12px; font-weight:500; color:var(--muted); background:transparent; border:0; padding:5px 13px; border-radius:6px; cursor:pointer; transition:color .12s;}
+  .seg-b.on{background:#fff; color:var(--text); box-shadow:0 1px 2px rgba(24,24,27,.08);}
+  .seg-b:not(.on):hover{color:var(--text);}
+  .seg + .caption{margin-top:8px;}
+  .post-actions{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;}
+  .act{font:inherit; font-size:12.5px; font-weight:500; padding:8px 13px; border-radius:var(--radius-sm); cursor:pointer; border:1px solid var(--line2); background:#fff; color:var(--text); transition:background .15s,border-color .15s;}
+  .act:hover{border-color:var(--line3); background:var(--soft);}
+  .act:active{transform:translateY(1px);}
+  .act.primary{background:var(--text); color:#fff; border-color:var(--text);}
+  .act.primary:hover{background:#000;}
+  .act.done{background:var(--accent); border-color:var(--accent); color:#fff;}
+  .tags{display:flex; flex-wrap:wrap; gap:5px; margin-top:12px; padding-top:11px; border-top:1px dashed var(--line2);}
+  .tags::before{content:"關鍵字"; font-size:10.5px; color:var(--faint); width:100%; margin-bottom:-3px;}
+  .tags span{font-size:11.5px; color:var(--faint); background:var(--softer); border:1px solid var(--line); padding:2px 7px; border-radius:6px;}
+  .tags span.hit{background:var(--accent-soft); color:var(--accent); border-color:#cfe0ff;}
+
+  .empty{padding:48px 4px; text-align:center; color:var(--faint); font-size:14px;}
+  .empty[hidden]{display:none;}
+
+  /* COLLAPSIBLE SECTIONS (poster bridge + keyword index) */
+  .panel{margin-top:14px; border:1px solid var(--line2); border-radius:var(--radius); overflow:hidden; background:var(--soft);}
+  .panel summary{list-style:none; cursor:pointer; display:flex; align-items:center; gap:12px; padding:16px 18px; user-select:none;}
+  .panel summary::-webkit-details-marker{display:none;}
+  .panel summary .ttl{font-size:14.5px; font-weight:600;}
+  .panel summary .desc{font-size:12.5px; color:var(--faint); font-weight:400;}
+  .panel-body{padding:4px 18px 20px; background:#fff; border-top:1px solid var(--line);}
+  .first-section{margin-top:34px;}
+
+  .pb-btns{display:flex; gap:9px; flex-wrap:wrap; margin:16px 0 4px;}
+  .pb-flow{font-size:13px; color:var(--muted); line-height:1.8; margin-top:8px;}
+  .pb-flow b{color:var(--text); font-weight:600; background:var(--softer); border-radius:5px; padding:1px 6px;}
+  a.act{text-decoration:none; display:inline-flex; align-items:center;}
+
+  .idx-group{padding:14px 0; border-top:1px solid var(--line);}
+  .idx-group:first-child{border-top:0;}
+  .idx-group[hidden]{display:none;}
+  .idx-group h3{font-size:13.5px; font-weight:600; margin-bottom:9px; display:flex; gap:8px; align-items:baseline;}
+  .idx-group h3 em{font-style:normal; color:var(--faint); font-size:12px; font-weight:500;}
+  .idx-words{display:flex; flex-wrap:wrap; gap:6px;}
+  .idx-words span{font-size:12px; color:var(--muted); background:var(--soft); border:1px solid var(--line); padding:3px 8px; border-radius:6px;}
+  .idx-words span.hit{background:var(--accent-soft); color:var(--accent); border-color:#cfe0ff;}
+
+  footer{margin-top:44px; padding-top:20px; border-top:1px solid var(--line); font-size:12px; color:var(--faint); line-height:1.8;}
+
+  /* ════ 嵌入式貼文宣傳圖產生器：海報元件（與獨立產生器同源） ════ */
+  .poster .p-head{display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .poster .brand{display:flex;align-items:center;gap:13px}
+  .poster .brand .dot{width:18px;height:18px;border-radius:999px}
+  .poster .brand .name{font-size:27px;font-weight:800;color:#1b1b1b;letter-spacing:.01em}
+  .poster .p-title{font-size:78px;font-weight:900;line-height:1.16;letter-spacing:-1px;color:#141414}
+  .poster .p-sub{font-size:31px;font-weight:500;line-height:1.55;color:#5c5c5c;max-width:840px}
+  .poster .p-panel{border-radius:44px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .poster .p-panel i{color:#fff;line-height:1;display:block}
+  .poster .p-panel svg.picon{display:block;fill:#fff}
+  .poster .p-foot{display:flex;align-items:flex-end;justify-content:space-between;gap:18px}
+  .poster .addr{font-size:25px;font-weight:600;color:#8c8c8c;line-height:1.5}
+  .poster .addr b{color:#3a3a3a;font-weight:800}
+  .poster .tag-chip{font-size:27px;font-weight:800;background:#fff;border:2.5px solid;border-radius:999px;padding:12px 26px;white-space:nowrap}
+  .poster{width:1080px;height:1080px;padding:72px;display:flex;flex-direction:column;position:relative;overflow:hidden;font-family:"Noto Sans TC","Inter",sans-serif}
+  .poster .p-title{margin-top:34px}
+  .poster .p-sub{margin-top:20px}
+  .poster .p-panel{flex:1;min-height:340px;margin:40px 0}
+  .poster .p-panel i{font-size:360px}
+  .poster .p-panel svg.picon{width:360px;height:360px}
+  .poster.wide{width:1200px;height:900px;padding:62px;display:flex;flex-direction:row;gap:54px}
+  .poster.wide .p-col{flex:1;display:flex;flex-direction:column;min-width:0}
+  .poster.wide .p-title{margin-top:28px;font-size:62px;line-height:1.15}
+  .poster.wide .p-sub{margin-top:16px;font-size:27px;max-width:none}
+  .poster.wide .p-foot{margin-top:auto}
+  .poster.wide .p-panel{flex:0 0 44%;align-self:stretch;margin:0;border-radius:40px}
+  .poster.wide .p-panel i{font-size:300px}
+  .poster.wide .p-panel svg.picon{width:300px;height:300px}
+  .poster.wide .brand .name{font-size:23px}
+  .poster.wide .brand .dot{width:15px;height:15px}
+  .poster.wide .addr{font-size:22px}
+  .poster.wide .tag-chip{font-size:23px;padding:10px 22px}
+  .poster.gbp{width:1200px;height:675px;padding:50px 56px;display:flex;flex-direction:row;gap:46px}
+  .poster.gbp .p-col{flex:1;display:flex;flex-direction:column;min-width:0}
+  .poster.gbp .p-title{margin-top:18px;font-size:54px;line-height:1.12}
+  .poster.gbp .p-sub{margin-top:14px;font-size:24px;max-width:none}
+  .poster.gbp .p-foot{margin-top:auto}
+  .poster.gbp .p-panel{flex:0 0 40%;align-self:stretch;margin:0;border-radius:34px}
+  .poster.gbp .p-panel i{font-size:240px}
+  .poster.gbp .p-panel svg.picon{width:240px;height:240px}
+  .poster.gbp .brand .name{font-size:22px}
+  .poster.gbp .brand .dot{width:14px;height:14px}
+  .poster.gbp .addr{font-size:21px}
+  .poster.gbp .tag-chip{font-size:22px;padding:9px 20px}
+
+  /* 產生器面板（modal） */
+  .gen-modal{position:fixed; inset:0; z-index:100; background:rgba(15,17,21,.55); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; padding:20px;}
+  .gen-modal[hidden]{display:none;}
+  .gen-box{background:#fff; border-radius:16px; width:min(660px,100%); max-height:94vh; overflow:auto; box-shadow:0 30px 80px rgba(0,0,0,.35); display:flex; flex-direction:column;}
+  .gen-head{display:flex; align-items:center; justify-content:space-between; padding:15px 20px; border-bottom:1px solid var(--line);}
+  .gen-head .t{font-size:15px; font-weight:600;}
+  .gen-x{border:0; background:none; font-size:24px; line-height:1; color:var(--muted); cursor:pointer; padding:2px 8px;}
+  .gen-x:hover{color:var(--text);}
+  .gen-controls{display:flex; gap:14px; flex-wrap:wrap; align-items:center; padding:14px 20px; border-bottom:1px solid var(--line);}
+  .gen-seg{display:inline-flex; background:var(--softer); border:1px solid var(--line2); border-radius:8px; padding:2px;}
+  .gen-seg button{font:inherit; font-size:12.5px; font-weight:500; color:var(--muted); background:none; border:0; padding:6px 12px; border-radius:6px; cursor:pointer;}
+  .gen-seg button.on{background:#fff; color:var(--text); box-shadow:0 1px 2px rgba(24,24,27,.1);}
+  .gen-seg .lab{align-self:center; font-size:11px; color:var(--faint); padding:0 4px 0 9px;}
+  .gen-preview{padding:20px; background:var(--soft); display:flex; justify-content:center;}
+  .gen-frame{position:relative; overflow:hidden; border-radius:14px; box-shadow:0 10px 34px rgba(0,0,0,.16); background:#fff;}
+  .gen-frame .scaler{position:absolute; top:0; left:0; transform-origin:top left; will-change:transform;}
+  .gen-actions{padding:15px 20px; display:flex; gap:12px; align-items:center; border-top:1px solid var(--line);}
+  .gen-status{font-size:12.5px; color:var(--muted);}
+  .gen-note{padding:0 20px 18px; font-size:12px; color:var(--faint); line-height:1.65;}
+
+  @media print{
+    .controls{position:static; backdrop-filter:none; background:#fff;}
+    .post-actions,.pb-btns,.panel summary .desc{display:none;}
+    .grp,.panel{break-inside:avoid;}
+    .post{break-inside:avoid;}
+    .grp summary{cursor:default;}
+    .preview,.badge,.grp-count,.grp-hi{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+    @page{size:A4; margin:14mm;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="ey">門市搜尋洞察 · B 軌社群曝光</div>
+    <h1>社群貼文洞察</h1>
+    <p class="sub">30 篇全方位社群貼文，每篇都是完整、可直接複製貼上的文案。依產品線收納，方便對照查找。</p>
+    <div class="stats">
+      <div class="stat"><div class="n">35</div><div class="l">貼文主題</div></div>
+      <div class="stat"><div class="n">9</div><div class="l">產品線</div></div>
+      <div class="stat"><div class="n">17</div><div class="l">高曝光</div></div>
+      <div class="stat"><div class="n">600</div><div class="l">實抓關鍵字</div></div>
+    </div>
+    <p class="src">資料來源 Google autocomplete 台灣，全部實抓。熱度為推估（依建議密度），待人工 SERP 驗證。Apple 名稱大小寫已校正，導購採需求引導不硬塞組合。<br><span id="kwUpdated">資料更新：2026-06-18</span></p>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="controls-inner">
+    <div class="search">
+      <span class="mg"></span>
+      <input id="q" type="text" placeholder="搜尋關鍵字、主題或商品（夜拍、舊換新、Apple Watch…）" autocomplete="off" />
+    </div>
+    <div class="sel">
+      <select id="catSel"><option value="">所有產品線</option></select>
+    </div>
+    <div class="sel">
+      <select id="expSel">
+        <option value="">所有曝光度</option>
+        <option value="高">高曝光</option>
+        <option value="中">中曝光</option>
+      </select>
+    </div>
+    <button class="reset" id="resetBtn" type="button">清除</button>
+  </div>
+</div>
+
+<main class="wrap">
+  <div class="toprow">
+    <div class="resultline" id="resultline"></div>
+    <button class="btn-sm" id="toggleAll" type="button">全部展開</button>
+  </div>
+  <div id="groups"></div>
+  <div class="empty" id="empty" hidden>沒有符合條件的貼文，換個關鍵字或清除篩選。</div>
+
+  <details class="panel first-section">
+    <summary>
+      <span class="chev"></span>
+      <span class="ttl">原始關鍵字索引</span>
+      <span class="grp-bar"></span>
+      <span class="desc">600 字 · 依產品線</span>
+    </summary>
+    <div class="panel-body" id="idxBody"></div>
+  </details>
+
+  <footer>
+    門市搜尋洞察 · B 軌社群曝光 · 全方位　|　單檔 HTML，可 Cmd+P 列印 A4。<br>
+    所有熱度為推估值，正式排程前建議抽樣 SERP 驗證。
+  </footer>
+</main>
+
+<div class="gen-modal" id="genModal" hidden>
+  <div class="gen-box">
+    <div class="gen-head"><span class="t">貼文宣傳圖產生器</span><button class="gen-x" id="genClose" type="button" aria-label="關閉">×</button></div>
+    <div class="gen-controls">
+      <div class="gen-seg" id="genModeSeg"><span class="lab">尺寸</span>
+        <button data-m="square" class="on" type="button">方形 1:1</button>
+        <button data-m="wide" type="button">橫式 4:3</button>
+        <button data-m="gbp" type="button">商家 16:9</button>
+      </div>
+      <div class="gen-seg" id="genFmtSeg"><span class="lab">格式</span>
+        <button data-f="png" class="on" type="button">PNG</button>
+        <button data-f="jpg" type="button">JPG</button>
+      </div>
+    </div>
+    <div class="gen-preview"><div class="gen-frame" id="genFrame"><div class="scaler" id="genScaler"></div></div></div>
+    <div class="gen-actions"><button class="act primary" id="genDownload" type="button">下載這張圖</button><span class="gen-status" id="genStatus"></span></div>
+    <p class="gen-note">圖示依文案關鍵字自動配對（有邏輯）。想改文字或批次多張，用下方「進階配圖」開完整產生器。</p>
+  </div>
+</div>
+
+<script>
+const POSTS = [
+ {id:1, cat:"iPhone", title:"iPhone 一直很耗電？關掉這幾項馬上有感", exp:"高", angle:"痛點", kw:["iPhone 耗電 原因","iPhone 省電 設定","iPhone 耗電 異常","iPhone 充電 上限"], goods:"MagSafe 充電器、行動電源", cta:"手機一下就沒電？來門市幫你檢查耗電元兇"},
+ {id:2, cat:"iPhone", title:"截圖、長截圖、螢幕錄影，iPhone 內建一次學會", exp:"高", angle:"比較解惑", kw:["iPhone 怎麼 截圖","iPhone 怎麼 長截圖","iPhone 螢幕錄影","iPhone 螢幕錄影 功能不見"], goods:"iPhone 全系列", cta:"想存整頁對話或網頁？長截圖這樣做"},
+ {id:3, cat:"iPhone", title:"iPhone 藏起來的實用功能，多數人沒打開過", exp:"高", angle:"比較解惑", kw:["iPhone 隱藏功能","iPhone 17 新功能","iPhone 16 新功能","iPhone 新功能 照片"], goods:"iPhone 全系列（新機帶新功能）", cta:"你的 iPhone 其實會這些，來門市現場開給你看"},
+ {id:4, cat:"iPhone", title:"自製專屬鈴聲，不用付費也能換", exp:"中", angle:"痛點", kw:["iPhone 鈴聲 製作","iPhone 鈴聲 設定","iPhone 鈴聲 自動變小"], goods:"iPhone 全系列", cta:"想用自己喜歡的歌當鈴聲？三步驟教你做"},
+
+ {id:5, cat:"換機備份", title:"換新機資料怎麼搬？LINE、照片一個都不掉", exp:"高", angle:"痛點", kw:["iPhone 換機 轉移","iPhone 資料轉移 LINE","iPhone 換機 步驟","iPhone 資料轉移 要多久"], goods:"新機（搭舊換新）、iCloud 容量、傳輸線", cta:"準備換機怕資料不見？來門市現場幫你轉一次"},
+ {id:6, cat:"換機備份", title:"iPhone 照片備份到電腦／硬碟，三種方法比一比", exp:"中", angle:"比較解惑", kw:["iPhone 備份 到電腦","iPhone 備份 iCloud","iPhone 備份 照片到電腦"], goods:"iCloud 方案、外接硬碟、讀卡機", cta:"照片只存手機很危險，來看哪種備份最適合你"},
+
+ {id:7, cat:"拍照修圖", title:"一鍵清掉路人雜物，iPhone 也能修出乾淨照片", exp:"高", angle:"痛點", kw:["iPhone 修圖 路人","iPhone 照片 去除 雜物","iPhone 修圖 橡皮擦"], goods:"支援 Apple Intelligence 的 iPhone（16／17 系列）", cta:"風景拍到路人入鏡？30 秒教你清掉"},
+ {id:8, cat:"拍照修圖", title:"人像模式＋夜拍，把日常拍成作品", exp:"高", angle:"比較解惑", kw:["iPhone 人像模式 技巧","iPhone 夜拍 設定","iPhone 夜拍 星空","iPhone 人像 調色"], goods:"iPhone 全系列＋穩定用迷你腳架", cta:"夜景總是糊、人像不夠柔？來門市現場調一次"},
+
+ {id:9, cat:"iPad", title:"iPad 怎麼挑？學生、筆記、繪圖各有最佳解", exp:"高", angle:"比較解惑", kw:["iPad 推薦","iPad 怎麼 選","iPad 推薦 學生","iPad 推薦 2026"], goods:"iPad 全系列、Apple Pencil、鍵盤（搭學生方案）", cta:"不知道買哪台 iPad？來門市三個問題幫你選對"},
+ {id:10, cat:"iPad", title:"iPad 變筆記神器，手寫＋App 一次到位", exp:"高", angle:"痛點", kw:["iPad 筆記 app","iPad 手寫 筆記","iPad 手寫膜","iPad 筆記 推薦"], goods:"Apple Pencil、類紙手寫膜、保護殼", cta:"想用 iPad 取代紙本筆記？來試寫看手感差多少"},
+ {id:11, cat:"iPad", title:"iPad 畫畫入門，Procreate 加這支筆就開工", exp:"中", angle:"比較解惑", kw:["iPad 繪圖","iPad 繪圖 procreate","iPad 繪圖 推薦","iPad 繪圖 支架"], goods:"Apple Pencil Pro、繪圖支架、類紙膜", cta:"想開始用 iPad 畫畫？來看入門要準備什麼"},
+ {id:12, cat:"iPad", title:"Apple Pencil 哪一支配你的 iPad？差異一次看", exp:"中", angle:"比較解惑", kw:["Apple Pencil 差異","Apple Pencil 配對","Apple Pencil Pro","Apple Pencil 筆尖"], goods:"Apple Pencil 系列、替換筆尖", cta:"買 Pencil 前先確認相容，來門市幫你對機型"},
+
+ {id:13, cat:"Mac", title:"MacBook 學生方案＋分期，開學前這樣買最划算", exp:"高", angle:"檔期", kw:["MacBook 學生 優惠 2026","MacBook 學生價","MacBook 學生分期","Apple 教育價 資格"], goods:"MacBook（教育價）、分期、保護配件", cta:"開學想換筆電？來門市試算教育價＋分期方案"},
+ {id:14, cat:"Mac", title:"只是文書打字，要買哪台 MacBook 才不浪費？", exp:"中", angle:"比較解惑", kw:["MacBook 推薦","MacBook 文書機","MacBook 推薦 配件"], goods:"MacBook Air、擴充 Hub、滑鼠鍵盤", cta:"只用來打字上網？來門市幫你挑剛剛好的那台"},
+ {id:15, cat:"Mac", title:"MacBook 電池健康度怎麼看？膨脹了該換嗎", exp:"中", angle:"痛點", kw:["MacBook 電池 健康度","MacBook 電池 循環次數","MacBook 電池 膨脹"], goods:"電池健康度檢查、代送授權維修、AppleCare", cta:"來門市幫你看電池健康度，需要維修可代送授權中心"},
+ {id:16, cat:"Mac", title:"Mac 新手必學，截圖與備份這樣設", exp:"中", angle:"比較解惑", kw:["Mac 怎麼 截圖","Mac 截圖 快捷鍵","Mac 備份 外接硬碟"], goods:"外接硬碟、擴充 Hub", cta:"剛換 Mac 不上手？來門市快速教你必學操作"},
+
+ {id:17, cat:"Apple Watch", title:"Apple Watch 顧健康，睡眠、心率全都記", exp:"高", angle:"痛點", kw:["Apple Watch 健康 功能","Apple Watch 睡眠 偵測","Apple Watch 心率","Apple Watch 睡眠呼吸中止"], goods:"Apple Watch 全系列、運動型錶帶", cta:"想開始管理睡眠跟心率？來門市現場設定給你看"},
+ {id:18, cat:"Apple Watch", title:"第一支 Apple Watch 怎麼選？功能差異一次懂", exp:"高", angle:"比較解惑", kw:["Apple Watch 功能 介紹","Apple Watch 怎麼 選","Apple Watch 功能 差異"], goods:"Apple Watch 系列", cta:"不知道買哪支 Apple Watch？來門市幫你比功能"},
+
+ {id:20, cat:"AirPods", title:"AirPods Pro 3 翻譯與助聽器功能，實測給你看", exp:"高", angle:"比較解惑", kw:["AirPods Pro 3 翻譯 功能","AirPods Pro 3 助聽器 功能","AirPods Pro 功能 介紹"], goods:"AirPods Pro 3", cta:"AirPods Pro 3 新功能很實用，來門市現場體驗"},
+ {id:21, cat:"AirPods", title:"AirPods 連不上電腦、通話有雜音？逐項解決", exp:"中", angle:"痛點", kw:["AirPods 連接 不上","AirPods 連接 電腦","AirPods 通話 雜音","AirPods 降噪 怎麼開"], goods:"AirPods 全系列", cta:"AirPods 一直連不上？來門市幫你重新配對"},
+ {id:22, cat:"AirPods", title:"AirPods 髒了別硬擦，正確清潔這樣做", exp:"中", angle:"痛點", kw:["AirPods 怎麼 清潔","AirPods 清潔 套件","AirPods 清潔 費用"], goods:"清潔套件", cta:"AirPods 聲音變悶？來門市看怎麼安全清潔"},
+
+ {id:23, cat:"配件", title:"MagSafe 到底是什麼？這樣配最好用", exp:"中", angle:"比較解惑", kw:["MagSafe 是什麼","MagSafe 行動電源","iPhone 殼 MagSafe","iPhone 殼 散熱"], goods:"MagSafe 充電器、磁吸行動電源、相容手機殼、支架", cta:"想用 MagSafe 配件？來門市看哪些殼相容"},
+ {id:24, cat:"配件", title:"充電孔接觸不良、進水？先別急著送修", exp:"中", angle:"痛點", kw:["iPhone 充電 充不進去","iPhone 充電孔 進水","iPhone 充電孔 清潔"], goods:"充電線、充電頭、清潔服務", cta:"充電要喬角度才會充？來門市幫你檢查充電孔"},
+ {id:25, cat:"配件", title:"保護貼起氣泡、想換新？門市現場幫你貼到好", exp:"中", angle:"痛點", kw:["手機 保護貼 推薦","手機 保護貼 氣泡","手機 保護貼 更換"], goods:"保護貼、貼膜服務", cta:"保護貼起泡又刮花？來門市換一張貼到好"},
+
+ {id:26, cat:"iCloud帳號", title:"iCloud 容量爆滿？方案費用與整理一次說清楚", exp:"高", angle:"痛點", kw:["iCloud 容量 不足","iCloud 容量 方案","iCloud 容量 費用","iCloud 容量 共享"], goods:"iCloud 付費方案（含家庭共享）", cta:"一直跳容量不足？來門市看哪個方案最適合你"},
+ {id:27, cat:"iCloud帳號", title:"Apple ID 忘記密碼、被異地登入怎麼辦", exp:"中", angle:"痛點", kw:["Apple ID 忘記密碼","Apple ID 在國外被登入","Apple ID 登入"], goods:"帳號安全設定協助", cta:"擔心帳號被盜？來門市幫你檢查 Apple ID 安全設定"},
+
+ {id:28, cat:"門市優惠", title:"iPhone 舊換新值得嗎？現場估價流程公開", exp:"高", angle:"比較解惑", kw:["iPhone 舊換新 估價","iPhone 舊換新 流程","iPhone 舊換新 值得嗎","iPhone 舊換新 現場"], goods:"新機＋舊機折抵＋資料轉移服務", cta:"想知道舊機能折多少？帶來門市現場估價"},
+ {id:29, cat:"門市優惠", title:"Apple 教育價誰能買？分期零利率一次算清", exp:"高", angle:"檔期", kw:["Apple 教育價 資格","Apple 教育價 怎麼買","iPhone 分期 零利率","iPad 學生 專案 2026"], goods:"iPad／MacBook（教育價）、分期方案", cta:"開學想入手？來門市試算教育價＋分期"},
+ {id:30, cat:"季節", title:"暑假出遊怎麼拍才好看？這幾招現學現用", exp:"中", angle:"檔期", kw:["出遊 拍照 技巧","出遊 拍照 姿勢","出遊 拍照 神器"], goods:"iPhone（變焦／人像）＋自拍棒、迷你腳架、行動電源", cta:"暑假要出遊了？拍前先看這幾個設定"},
+ {id:31, cat:"在地服務", title:"iPhone 要維修？高雄門市代收代送授權中心", exp:"高", angle:"比較解惑", kw:["高雄 iPhone 維修","Apple 授權維修中心 楠梓","高雄 換電池"], goods:"代收代送授權維修、電池健康度檢查", cta:"高雄楠梓在地收送，不用自己跑"},
+ {id:32, cat:"在地服務", title:"舊 iPhone 別閒置，高雄現場估價回收", exp:"高", angle:"比較解惑", kw:["高雄 二手 iPhone","iPhone 舊換新 估價","高雄 買 iPhone"], goods:"舊機估價回收、折抵新機、資料轉移", cta:"帶舊機來高雄楠梓門市，當天知道折多少"},
+ {id:33, cat:"在地服務", title:"貼膜起泡、想換新？楠梓現場幫你貼到好", exp:"中", angle:"痛點", kw:["楠梓 手機貼膜","高雄 貼膜","Apple Watch 貼膜"], goods:"貼膜服務、保護貼（iPhone／iPad／Apple Watch）", cta:"楠梓在地，順路就能處理"},
+ {id:34, cat:"在地服務", title:"想在高雄買 iPhone？分期零利率＋舊換新", exp:"中", angle:"比較解惑", kw:["高雄 買 iPhone","高雄 iPhone 分期","分期零利率"], goods:"新機、分期零利率、舊換新折抵、教育價", cta:"來楠梓門市，幫你算最划算的組合"},
+ {id:35, cat:"在地服務", title:"配件怕買錯？楠梓現場試吸 MagSafe、比手感", exp:"中", angle:"痛點", kw:["楠梓 手機配件","MagSafe","高雄 行動電源"], goods:"手機殼、保護貼、MagSafe、行動電源", cta:"楠梓在地，配件不用等宅配"},
+ {id:36, cat:"在地服務", title:"找高雄的 Apple 服務據點？楠梓德民路就到", exp:"中", angle:"比較解惑", kw:["高雄 Apple Shop","楠梓 Apple","高雄 蘋果"], goods:"購買／舊換新／配件／貼膜／教育價／使用教學", cta:"導航搜「Apple Shop 高雄右昌」就到"},
+];
+
+/* 完整可直接複製的社群貼文文案（依 id 對應） */
+const CAPTIONS = {
+1:`iPhone 還沒到下午就剩一半電？🔋
+
+其實多數人不知道，背景 App 重新整理、定位、自動亮度，一直在默默偷電。關掉幾個用不到的設定，再把 iOS 的「最佳化電池充電」打開，續航明顯有感、電池也更耐用。
+
+不確定哪些該關？把手機帶來門市，我們現場一項一項幫你檢查、調到最省電。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#iPhone省電 #iPhone耗電 #iPhone教學 #高雄右昌 #AppleShop #高雄手機`,
+
+2:`截圖、長截圖、螢幕錄影，其實 iPhone 全都內建。📱
+
+想存整頁網頁或一長串對話？長截圖一次搞定，不用拍很多張再拼。想錄下操作步驟教家人？螢幕錄影打開就能用，連聲音都收得到。這些都不用裝任何 App。
+
+不知道功能藏在哪？來門市，我們一個一個示範給你看。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#iPhone教學 #iPhone截圖 #螢幕錄影 #高雄右昌 #AppleShop`,
+
+3:`用了好幾年 iPhone，這些功能你可能還沒打開過。✨
+
+背面輕點兩下截圖、單手鍵盤、相機快速啟動、即時文字辨識，每一個都讓日常更順手。新機型還多了不少實用的新功能。
+
+想知道你的 iPhone 還會什麼？來門市，我們現場一個一個開給你看。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#iPhone隱藏功能 #iPhone教學 #iPhone技巧 #高雄右昌 #AppleShop`,
+
+4:`想把喜歡的歌設成 iPhone 鈴聲，其實不用花錢買。🎵
+
+用內建工具就能把自己的音樂剪成鈴聲，來電、鬧鐘都換成你想聽的那一段。順便教你關掉「鈴聲自動變小」，重要來電不再漏接。
+
+想換鈴聲卻卡關？來門市，我們帶你做一次就會。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#iPhone鈴聲 #iPhone教學 #iPhone技巧 #高雄右昌 #AppleShop`,
+
+5:`準備換新 iPhone，最怕資料搬不過去？
+
+照片、聯絡人、LINE 對話其實都能完整轉移。用有線傳輸最快，LINE 記得先單獨備份才不會掉訊息。擔心步驟做錯、資料不見，這件事就交給我們。
+
+來門市，現場手把手幫你把舊機資料安全轉到新機。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#iPhone換機 #資料轉移 #LINE備份 #高雄右昌 #AppleShop`,
+
+6:`照片只存在手機裡，其實很危險。
+
+手機掉了、壞了、被偷了，回憶就跟著不見。備份有三種方法：iCloud 自動同步、傳到電腦、存外接硬碟，各有適合的人。
+
+不知道哪種適合你？來門市，我們依你的使用習慣幫你設定最安心的備份。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#iPhone備份 #照片備份 #iCloud #高雄右昌 #AppleShop`,
+
+7:`出遊拍到美景，卻被路人入鏡？📷
+
+現在 iPhone 內建的智慧消除，只要框一下，背景的路人、雜物都能清掉，照片瞬間變乾淨。支援這項功能的機型，修圖完全不用再下載 App。
+
+想學怎麼用？帶你的照片來門市，我們現場示範清給你看。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#iPhone修圖 #智慧消除 #AppleIntelligence #高雄右昌 #AppleShop`,
+
+8:`同樣用 iPhone，為什麼別人拍的人像跟夜景特別好看？
+
+人像模式選對焦距、調一下景深，主角清楚、背景柔；夜景打開夜間模式、手穩住，暗的地方也能拍得乾淨明亮。這些都是內建功能，設定一下就有差。
+
+想拍出作品感？來門市，我們現場教你怎麼調。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#iPhone攝影 #人像模式 #夜拍技巧 #高雄右昌 #AppleShop`,
+
+9:`想買 iPad，但機型一堆不知道挑哪台？
+
+看用途就好挑：追劇上網選基本款、做筆記搭 Apple Pencil、畫圖剪片就選效能更好的機型。學生還能用教育價更划算。買錯規格很可惜。
+
+來門市，回答三個問題，我們幫你選到最適合的那台 iPad。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#iPad推薦 #iPad怎麼選 #教育價 #高雄右昌 #AppleShop`,
+
+10:`想用 iPad 取代紙本筆記，從哪開始？✏️
+
+搭一支 Apple Pencil，加上好用的筆記 App，手寫、打字、畫重點都能同一本。貼上類紙膜，書寫手感更接近真的在紙上寫。
+
+想知道手感差多少？來門市，現場讓你試寫看看再決定。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#iPad筆記 #ApplePencil #手寫筆記 #高雄右昌 #AppleShop`,
+
+11:`想用 iPad 開始畫畫，需要準備什麼？🎨
+
+一台效能夠的 iPad、一支 Apple Pencil Pro，再加上繪圖 App 就能開工。想長時間畫，配個支架跟類紙膜會更舒服。
+
+不確定哪個組合適合入門？來門市，我們依你的需求幫你配齊。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#iPad繪圖 #Procreate #ApplePencil #高雄右昌 #AppleShop`,
+
+12:`Apple Pencil 有好幾款，哪一支配你的 iPad？
+
+不同款 Pencil 支援的 iPad 不一樣，配對與充電方式也不同，買錯就不能用。Apple Pencil Pro 還多了好用的新手感功能。
+
+不確定相容性？來門市，報你的 iPad 型號，我們直接幫你對到正確那支。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#ApplePencil #iPad配件 #ApplePencilPro #高雄右昌 #AppleShop`,
+
+13:`開學想換筆電，預算想花在刀口上？🎒
+
+學生與教職人員可用教育價買 MacBook，搭配分期零利率，每月負擔更輕。開學季通常還有加碼好禮。
+
+想知道自己符不符合資格、實際每月多少？來門市，我們現場幫你試算教育價加分期。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#MacBook學生 #教育價 #開學裝備 #高雄右昌 #AppleShop`,
+
+14:`只是上網、打報告，要買哪台 MacBook？💻
+
+文書、追劇、上網，MacBook Air 就很夠用，不用多花錢買到 Pro。重點是選對容量跟記憶體，用好幾年都順。
+
+不確定規格夠不夠？來門市，說你的用途，我們幫你挑剛剛好的那台。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#MacBook推薦 #MacBookAir #文書筆電 #高雄右昌 #AppleShop`,
+
+15:`MacBook 越來越不耐電，是該換電池了嗎？
+
+可以先看「電池健康度」跟循環次數，數字到了一定程度，續航變差很正常。若電池有膨脹，要儘快處理比較安全。
+
+不會看？來門市幫你檢查電池健康度；需要維修，門市可代收代送 Apple 授權維修中心處理。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#MacBook電池 #電池健康度 #Mac保養 #高雄右昌 #AppleShop`,
+
+16:`剛從 Windows 換到 Mac，有點不習慣？
+
+截圖快捷鍵、複製貼上、關機、用 Time Machine 自動備份，這幾招先學會，操作馬上順很多。其實 Mac 沒有想像中難。
+
+來門市，我們帶你把新手必學的操作走一遍。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#Mac教學 #Windows換Mac #Mac新手 #高雄右昌 #AppleShop`,
+
+17:`想開始顧健康，但不知道從哪管起？❤️
+
+Apple Watch 會幫你記睡眠分數、心率變化、運動量，連睡眠呼吸中止的提醒都有，身體狀況一目了然。數據看懂了，作息更有方向。
+
+想知道怎麼設定、怎麼看？來門市，我們現場幫你開好功能。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#AppleWatch #健康監測 #睡眠偵測 #高雄右昌 #AppleShop`,
+
+18:`想入手第一支 Apple Watch，型號怎麼挑？⌚
+
+看需求就好選：日常通知與健康記錄選一般款，愛運動、登山、潛水就考慮 Ultra。錶面尺寸跟錶帶也會影響配戴感。
+
+不確定差在哪？來門市，我們幫你比功能、看實機規格再決定。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#AppleWatch #AppleWatch怎麼選 #智慧手錶 #高雄右昌 #AppleShop`,
+
+20:`AirPods Pro 3 不只是耳機，還能即時翻譯。🎧
+
+跟外國人對話，戴著就能聽到翻譯；它的聽力輔助功能，也能在吵雜環境幫你聽得更清楚。這些新功能用過就回不去。
+
+想實際體驗？來門市，現場讓你戴上試聽看看。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#AirPodsPro #即時翻譯 #聽力輔助 #高雄右昌 #AppleShop`,
+
+21:`AirPods 連不上電腦、通話有雜音？
+
+多半是配對沒重置，或裝置切換沒設好。重新配對一次、調整麥克風設定，通常就能解決。
+
+自己用一直卡關？來門市，我們幫你重新配對、把連線問題一次處理好。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#AirPods #AirPods連線 #耳機教學 #高雄右昌 #AppleShop`,
+
+22:`AirPods 聲音變悶、變小，可能只是髒了。
+
+耳垢、灰塵卡在出音孔，音質就會打折。用對工具跟方法清，聲音常常就回來了，硬擦反而傷網孔。
+
+不敢自己清？來門市，我們教你正確的清潔方式。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#AirPods清潔 #AirPods保養 #耳機 #高雄右昌 #AppleShop`,
+
+23:`常聽到 MagSafe，它到底是什麼？
+
+就是 iPhone 背後的磁吸生態系：磁吸充電器一貼就充、磁吸行動電源不用線、還有各種磁吸支架跟卡套。重點是手機殼要支援 MagSafe 才吸得牢。
+
+想配齊磁吸配件？來門市，我們幫你看哪些殼跟配件相容。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#MagSafe #iPhone配件 #磁吸充電 #高雄右昌 #AppleShop`,
+
+24:`iPhone 要喬角度才充得進去？先別急著送修。
+
+很多時候不是壞了，是充電孔卡了灰塵或棉絮，接觸不良，清乾淨往往就正常了。若是進水，正確處理也能降低損傷。
+
+不確定狀況？來門市，我們幫你檢查充電孔、判斷要不要進一步處理。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#iPhone充電 #充電孔 #手機保養 #高雄右昌 #AppleShop`,
+
+25:`保護貼起氣泡、邊邊刮花，看了好阿雜？
+
+換一張新的就清爽。不同材質手感跟防摔程度不一樣，貼的時候除塵沒做好才會跑氣泡。
+
+不想自己貼貼歪？來門市，我們現場除塵幫你貼到平整無氣泡。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#保護貼 #手機貼膜 #iPhone配件 #高雄右昌 #AppleShop`,
+
+26:`手機一直跳「iCloud 儲存空間不足」？
+
+免費的 5GB 很快就滿，照片、備份、訊息都靠它。其實升級方案費用不高，還能用家庭共享分給家人，一人付全家用。
+
+不知道選哪個容量划算？來門市，我們依你的使用量幫你算最適合的方案。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#iCloud #儲存空間 #iCloud容量 #高雄右昌 #AppleShop`,
+
+27:`忘記 Apple ID 密碼，或收到「異地登入」通知？
+
+密碼可以透過信任的裝置重設；開啟雙重驗證後，別人就算知道密碼也登不進去，帳號更安全。
+
+擔心帳號被盜？來門市，我們幫你檢查 Apple ID 的安全設定。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#AppleID #帳號安全 #雙重驗證 #高雄右昌 #AppleShop`,
+
+28:`想換新 iPhone，舊機到底能折多少？
+
+舊機回收折抵後，入手新機的負擔會少很多。實際金額看機型跟狀況，現場估價最準，當天就知道折抵多少、資料也一次幫你轉移好。
+
+帶著舊機來門市，我們現場幫你估價，算給你看實際要付多少。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#iPhone舊換新 #以舊換新 #換機 #高雄右昌 #AppleShop`,
+
+29:`Apple 教育價誰能買？怎麼買最划算？🎓
+
+學生、應屆新生、教職人員都符合資格，買 iPad、MacBook 享教育價，再搭分期零利率，負擔更輕。開學季常有加碼好禮。
+
+想知道自己符不符合、實際多少錢？來門市，我們現場幫你試算。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#Apple教育價 #學生方案 #開學裝備 #高雄右昌 #AppleShop`,
+
+30:`暑假要出遊了，怎麼拍才好看又不糊？🌴
+
+構圖用九宮格參考線、人像開景深、移動中拍就用快一點的快門，遠的景善用變焦。出門前記得帶行動電源，拍整天也不怕沒電。
+
+想拍出旅遊大片？來門市，我們教你幾個馬上用得到的設定。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#出遊拍照 #iPhone攝影 #旅遊拍照 #高雄右昌 #AppleShop`,
+
+31:`iPhone 不耐電、螢幕裂了，不知道送哪修？🔧
+
+門市提供「代收代送」服務：幫你把裝置安全收件、送到 Apple 授權維修中心處理，好了再通知你回來取件，省去自己查、自己跑。也能先幫你看電池健康度，評估維修還是換新比較划算。
+
+高雄楠梓在地收送，不用自己處理。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#高雄 #楠梓 #高雄iPhone維修 #Apple授權維修 #AppleShop`,
+
+32:`舊 iPhone 放著只會更不值錢 💰
+
+與其閒置，不如折抵或換現金。來門市現場估價，看你的舊機況能折多少，當天就知道金額，換新機還能一次幫你把資料轉過去。
+
+高雄楠梓在地，估價不用等。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#高雄 #楠梓 #高雄二手iPhone #舊換新 #AppleShop`,
+
+33:`保護貼起氣泡、刮花，自己貼又貼歪？
+
+來門市現場除塵幫你貼到平整無氣泡，iPhone、iPad、Apple Watch 都能貼。不同材質手感與防摔程度不一樣，現場挑、現場貼。
+
+楠梓在地，順路就能處理。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#高雄 #楠梓 #高雄貼膜 #手機保護貼 #AppleShop`,
+
+34:`想在高雄入手新 iPhone，預算想分散？
+
+門市可分期零利率，搭配舊換新折抵，每月負擔更輕。現場核對教育價資格、當場帶機回家，不用等網購到貨。
+
+要哪一台、怎麼搭最划算，來楠梓門市幫你算。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#高雄 #楠梓 #高雄買iPhone #分期零利率 #AppleShop`,
+
+35:`手機殼、保護貼、充電、行動電源，一次配齊 🔌
+
+線上挑配件怕買到不相容？來門市現場試吸 MagSafe、比手感、確認規格相容再帶走。
+
+楠梓在地，配件不用等宅配。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#高雄 #楠梓 #Apple配件 #MagSafe #AppleShop`,
+
+36:`在找高雄的 Apple 服務據點？📍
+
+我們在楠梓德民路837號 2樓，買新機、舊換新、配件、貼膜、教育價、使用教學都能就近處理。不確定要找誰問，先來門市，我們幫你看。
+
+導航搜「Apple Shop 高雄右昌」就到。
+
+📍 Apple Shop 高雄右昌｜楠梓德民路837號 2樓
+
+#高雄 #楠梓 #高雄蘋果 #AppleShop`,
+};
+
+/* IG 限動短版（限高曝光，字少、分行碎、適合限動圖文疊字） */
+const SHORTS = {
+1:`電量焦慮？🔋
+這幾個設定一直在偷電
+關掉就有感
+
+👉 來門市幫你調到最省電
+Apple Shop 高雄右昌`,
+2:`長截圖 × 螢幕錄影 📱
+其實 iPhone 都內建
+不用裝任何 App
+
+👉 來門市一次教會你
+Apple Shop 高雄右昌`,
+3:`用了好幾年 ✨
+這些 iPhone 功能你開過嗎？
+背面點兩下就截圖
+
+👉 來門市現場開給你看
+Apple Shop 高雄右昌`,
+5:`換新機怕資料不見？
+照片、LINE 一個都不掉
+
+👉 來門市現場幫你轉
+Apple Shop 高雄右昌`,
+7:`拍到路人入鏡 😩
+iPhone 框一下就清掉
+照片秒乾淨 📷
+
+👉 來門市示範給你看
+Apple Shop 高雄右昌`,
+8:`為什麼別人拍比較好看？
+人像＋夜拍設定有差
+
+👉 來門市現場教你調
+Apple Shop 高雄右昌`,
+9:`iPad 機型一堆？
+看用途就好選 👇
+追劇 / 筆記 / 畫圖
+
+👉 來門市幫你挑對那台
+Apple Shop 高雄右昌`,
+10:`想用 iPad 取代紙本？✏️
+Apple Pencil ＋ 類紙膜
+手感超接近真紙
+
+👉 來門市試寫看看
+Apple Shop 高雄右昌`,
+13:`開學換筆電 🎒
+教育價＋分期零利率
+每月更輕鬆
+
+👉 來門市試算給你看
+Apple Shop 高雄右昌`,
+17:`想顧健康不知從哪開始？❤️
+睡眠、心率全都記
+
+👉 來門市幫你開好功能
+Apple Shop 高雄右昌`,
+18:`第一支 Apple Watch ⌚
+一般款 vs Ultra 怎麼選？
+
+👉 來門市看實機再決定
+Apple Shop 高雄右昌`,
+20:`AirPods Pro 3 🎧
+戴著就能即時翻譯
+還能幫你聽得更清楚
+
+👉 來門市現場試聽
+Apple Shop 高雄右昌`,
+26:`一直跳容量不足？
+免費 5GB 真的不夠用
+升級其實不貴
+
+👉 來門市幫你算方案
+Apple Shop 高雄右昌`,
+28:`舊機能折多少？💰
+現場估價最準
+當天就知道折抵金額
+
+👉 帶舊機來門市估價
+Apple Shop 高雄右昌`,
+29:`Apple 教育價誰能買？🎓
+學生 / 新生 / 教職都符合
+
+👉 來門市試算最划算
+Apple Shop 高雄右昌`,
+31:`iPhone 要維修？🔧
+門市代收代送
+送 Apple 授權維修中心
+好了通知你回來取件
+
+👉 高雄楠梓在地收送
+Apple Shop 高雄右昌`,
+32:`舊 iPhone 別閒置 💰
+現場估價，當天知道折多少
+換現金或折抵新機
+
+👉 帶舊機來高雄楠梓門市
+Apple Shop 高雄右昌`,
+};
+
+const KEYWORDS = {
+ "iPhone 操作與痛點":["iphone 怎麼關機","iphone 怎麼強制關機","iphone 怎麼截圖","iphone 怎麼長截圖","iphone 怎麼錄音","iphone 怎麼改字體","iphone 怎麼重新開機","iphone 怎麼轉移資料","iphone 怎麼螢幕錄影","iphone 怎麼重置","iphone 設定門禁卡","iphone 設定鈴聲","iphone 設定充電上限","iphone 設定捷徑","iphone 設定桌布","iphone 設定信箱","iphone 設定密碼","iphone 設定dns","iphone 省電模式","iphone 省電設定","iphone 省電方法","iphone 省電技巧","iphone 省電模式 差別","iphone 省電模式關閉","iphone 耗電很快","iphone 耗電原因","iphone 耗電異常","iphone 耗電 設定","iphone 耗電app","iphone 耗電變快","iphone 變慢 解決","iphone 變慢原因","iphone 網路 變慢","iphone 充電 變慢","iphone 容量不足怎麼辦","iphone 容量不足 更新","iphone 容量不足 icloud","iphone 容量不足 line","iphone 容量不足 無法開機","iphone 螢幕錄影 功能不見","iphone 螢幕使用時間","iphone 螢幕鏡像輸出","iphone 隱藏功能","iphone 隱藏功能 針孔","iphone 17 隱藏功能","iphone 16 隱藏功能","iphone 15 隱藏功能","iphone 新功能 照片","iphone 17 新功能","iphone 16 新功能","iphone 鈴聲製作","iphone 鈴聲設定","iphone 鈴聲變小","iphone 鈴聲下載","iphone 鈴聲格式","iphone 鈴聲自動變小"],
+ "換機・備份・資料轉移":["iphone 換機 line","iphone 換機轉移","iphone 換機步驟","iphone 換機教學","iphone 換機 備份","iphone 換機優惠","iphone 換機 資料轉移","iphone 換機 sim卡","iphone 資料轉移失敗","iphone 資料轉移要多久","iphone 資料轉移 line","iphone 資料轉移 有線","iphone 資料轉移 sim卡","iphone 資料轉移 電腦","iphone 資料轉移 icloud","iphone 備份到電腦","iphone 備份隨身碟","iphone 備份 icloud","iphone 備份到外接硬碟","iphone 備份位置","iphone 備份到mac","iphone 備份照片到電腦"],
+ "拍照・修圖":["iphone 拍照設定","iphone 拍照聲音","iphone 拍照掃描","iphone 拍照技巧","iphone 拍照 技巧 風景","iphone 拍照 技巧 教學","iphone 拍照 技巧 ig","iphone 九宮格 拍照 技巧","演唱會 拍照 技巧 iphone","iphone 拍照 模糊 背景","iphone 拍照 好看 設定","iphone 修圖軟體","iphone 修圖技巧","iphone 修圖 橡皮擦","iphone 修圖 去人","iphone 修圖 馬賽克","iphone 修圖 路人","iphone 修圖 去背","iphone 照片 整理 術","iphone 照片 整理 到 電腦","iphone 照片 整理 軟體","iphone 照片 去除路人","iphone 照片 去除 雜物","iphone 照片 去除人物","iphone 照片 去除 浮水印","iphone 人像模式不見了","iphone 人像模式 焦距","iphone 人像模式 技巧","iphone 人像 調色","iphone 夜拍模式","iphone 夜拍設定","iphone 夜拍30秒","iphone 夜拍星空","iphone 夜拍月亮","iphone 夜景 怎麼拍","iphone 夜景 參數","iphone 濾鏡 參數","iphone 濾鏡 反差色","iphone 濾鏡 調色","iphone 逆光 調色","iphone 電影級 模式","iphone 縮時攝影 設定","iphone 慢動作 拍攝"],
+ "iPad":["ipad 推薦app","ipad 推薦 學生","ipad 推薦 2026","ipad 推薦筆記app","ipad 推薦殼","ipad 筆記軟體","ipad 筆記 app 免費","ipad 筆記推薦","ipad 筆記 教學","ipad 繪圖軟體","ipad 繪圖 procreate","ipad 繪圖板","ipad 繪圖 支架 推薦","ipad 手寫筆記","ipad 手寫筆","ipad 手寫字體","ipad 手寫膜","ipad 手寫板","ipad 怎麼截圖","ipad 怎麼分割畫面","ipad 怎麼選","ipad 怎麼看電池健康度","ipad 怎麼開兩個視窗","apple pencil pro","apple pencil 配對","apple pencil 2","apple pencil usb c","apple pencil 筆尖","apple pencil 充電","apple pencil 差異","apple pencil 副廠","ipad 鍵盤 推薦","ipad 鍵盤 羅技","ipad 鍵盤滑鼠","ipad 鍵盤保護套","ipad 學生方案","ipad 學生 專案 2026","ipad 學生價","ipad 學生方案 送筆","ipad 學生 專案 高中生"],
+ "Mac・MacBook":["macbook 推薦滑鼠","macbook 推薦app","macbook 推薦配件","macbook 推薦 鍵盤","macbook 推薦hub","macbook 學生方案","macbook 學生優惠","macbook 學生 專案 2026","macbook 學生價","macbook 學生分期","macbook 文書軟體","macbook 文書處理","macbook 文書機","mac 怎麼截圖","mac 怎麼刪除app","mac 怎麼複製貼上","mac 怎麼螢幕錄影","mac 怎麼用word","mac 備份 iphone","mac 備份 外接硬碟","mac 備份 icloud","mac 備份硬碟","macbook 電池健康度","macbook 電池更換","macbook 電池循環次數","macbook 電池膨脹","macbook 電池百分比","mac 截圖快捷鍵","mac 截圖工具","mac 截圖存放位置","mac 截圖軟體","mac 教學 課程","mac 教學 書"],
+ "Apple Watch":["apple watch 健康功能","apple watch 健康偵測","apple watch 健康監測","apple watch 健康 設定","apple watch 健康分享","apple watch 功能介紹","apple watch 功能比較","apple watch 功能推薦","apple watch 功能有哪些","apple watch 功能差異","apple watch 運動錶帶","apple watch 運動紀錄","apple watch 運動模式","apple watch 運動心率","apple watch 睡眠偵測","apple watch 睡眠分數","apple watch 睡眠呼吸中止","apple watch 睡眠監測","apple watch 怎麼配對","apple watch 怎麼充電","apple watch 怎麼換錶帶","apple watch 心率 準確度","apple watch 心率區間","apple watch 心率變異","apple watch 心率監測","apple watch 錶帶推薦","apple watch 錶帶怎麼拆","apple watch 錶帶尺寸","apple watch 錶帶怎麼裝","apple watch 錶帶更換"],
+ "AirPods":["airpods 連接電腦","airpods 連接失敗","airpods 連接不上","airpods 連接筆電","airpods 連接windows","airpods 連接mac","airpods 降噪怎麼開","airpods 降噪設定","airpods 降噪 雜音","airpods 降噪壞掉","airpods 降噪 沙沙聲","airpods 通話雜音","airpods 通話沒聲音","airpods 通話設定","airpods 通話翻譯","airpods 通話聲音很小","airpods 通話降噪","airpods 怎麼連電腦","airpods 怎麼戴","airpods 怎麼看第幾代","airpods 怎麼看電量","airpods 怎麼配對","airpods 怎麼清潔","airpods 怎麼重置","airpods 清潔套件","airpods 清潔方法","airpods 清潔 費用","airpods 清潔組","airpods pro 功能介紹","airpods pro 功能教學","airpods pro 3 功能","airpods pro 3 翻譯 功能","airpods pro 2 功能","airpods pro 3 助聽器 功能"],
+ "配件":["iphone 殼 推薦","iphone 殼 casetify","iphone 殼 散熱","iphone 殼 磁吸","iphone 殼 magsafe","iphone 殼 原廠","magsafe是什麼","magsafe 行動電源","magsafe 手機殼","magsafe 充電器","magsafe 支架","magsafe 卡套","magsafe 手機架","iphone 充電線","iphone 充電孔進水","iphone 充電充不進去","iphone 充電頭","iphone 充電上限","iphone 充電器","iphone 充電孔接觸不良","iphone 充電孔 清潔","行動電源推薦 ptt","行動電源 推薦 2026","行動電源 推薦品牌","行動電源 推薦 安全","行動電源 推薦 出國","手機 保護貼 推薦","手機 保護貼 移除","手機 保護貼 氣泡","手機 保護貼 教學","手機 保護貼 更換","手機 保護貼 種類"],
+ "iCloud・帳號":["icloud 備份 很久","icloud 備份 還原","icloud 備份 刪除","icloud 備份失敗","icloud 備份 line","icloud 備份照片","icloud 備份要多久","icloud 容量不足","icloud 容量方案","icloud 容量不夠","icloud 容量共享","icloud 容量費用","icloud 容量 2tb","icloud 容量整理","icloud 容量上限","apple id 註冊","apple id 忘記密碼","apple id 登入","apple id 密碼","apple id 申請","apple id 在國外被登入","icloud 怎麼買","icloud 怎麼共享","icloud 怎麼備份","icloud 怎麼買最便宜"],
+ "門市優惠・季節":["apple 教育價 資格","apple 教育價 限制","apple 教育價 2026","apple 教育價 怎麼買","apple 教育價 分期","apple 教育價 高中","iphone 舊換新 價格","iphone 舊換新 估價","iphone 舊換新 流程","iphone 舊換新 資料轉移","iphone 舊換新 值得嗎","iphone 舊換新 現場","iphone 分期零利率","iphone 分期付款","iphone 分期 信用卡","iphone 分期 回饋","iphone 分期 0 利率","applecare 是什麼","開學 筆電 推薦","出遊 拍照 姿勢","出遊 拍照 技巧","出遊 拍照 神器","出遊 拍照 相機 推薦","情侶 出遊 拍照","閨蜜 出遊 拍照"],
+ "在地服務（高雄／楠梓）":["高雄 iphone 維修","高雄 iphone 換電池","高雄 iphone 換電池 原廠","高雄 iphone 維修 推薦","高雄 iphone 螢幕 維修","高雄 iphone 維修 便宜","高雄 換電池 推薦","高雄 手機 換電池","高雄 apple watch 換電池","高雄 二手 iphone","高雄 買 iphone","高雄 iphone 分期","楠梓 手機貼膜","楠梓 手機包膜","楠梓 手機保護貼","高雄 貼膜","高雄 apple watch 貼膜","高雄 apple 直營店","高雄 蘋果直營店","高雄 apple store","高雄 apple shop","楠梓 apple","apple 授權維修中心 楠梓","高雄 apple 維修","高雄 apple watch 錶帶"],
+};
+
+const CASE_RULES = [
+ [/airpods pro/gi,"AirPods Pro"],[/airpods/gi,"AirPods"],
+ [/apple watch/gi,"Apple Watch"],[/apple pencil pro/gi,"Apple Pencil Pro"],[/apple pencil/gi,"Apple Pencil"],
+ [/apple id/gi,"Apple ID"],[/applecare/gi,"AppleCare"],[/apple/gi,"Apple"],
+ [/iphone/gi,"iPhone"],[/ipad/gi,"iPad"],[/macbook/gi,"MacBook"],[/\bmac\b/gi,"Mac"],
+ [/magsafe/gi,"MagSafe"],[/icloud/gi,"iCloud"],[/procreate/gi,"Procreate"],
+ [/\bline\b/gi,"LINE"],[/\bios\b/gi,"iOS"],[/\bsim\b/gi,"SIM"],[/\bpdf\b/gi,"PDF"],
+ [/\bptt\b/gi,"PTT"],[/\bdcard\b/gi,"Dcard"],[/\big\b/gi,"IG"],[/\bdns\b/gi,"DNS"],
+ [/\bwin10\b/gi,"Win10"],[/\bwin11\b/gi,"Win11"],[/\bword\b/gi,"Word"],[/\bhub\b/gi,"Hub"],
+ [/\busb c\b/gi,"USB-C"],[/\b2tb\b/gi,"2TB"],
+];
+function fixCase(s){let r=s;CASE_RULES.forEach(([re,rep])=>{r=r.replace(re,rep);});return r;}
+
+const CAT_ORDER = ["iPhone","換機備份","拍照修圖","iPad","Mac","Apple Watch","AirPods","配件","iCloud帳號","門市優惠","季節","在地服務"];
+// 每個產品線一個專屬色 [主色（白字可讀）, 柔色底]
+const CAT_COLOR = {
+  "iPhone":["#1d4ed8","#eef3ff"], "換機備份":["#0f766e","#e6f5f3"], "拍照修圖":["#c2410c","#fcefe7"],
+  "iPad":["#be185d","#fce8f0"], "Mac":["#475569","#eef1f5"], "Apple Watch":["#047857","#e6f5ef"],
+  "AirPods":["#6d28d9","#f3edfc"], "配件":["#b45309","#fcf1e2"], "iCloud帳號":["#0369a1","#e6f2fb"],
+  "門市優惠":["#be123c","#fdeaef"], "季節":["#a16207","#faf3e0"],
+  "在地服務":["#8a5a2b","#f4ece0"],
+};
+const state = {q:"", cat:"", exp:""};
+
+/* 建產品線下拉選單 */
+const catSel = document.getElementById("catSel");
+CAT_ORDER.forEach(c=>{
+  if(POSTS.some(p=>p.cat===c)){
+    const o=document.createElement("option"); o.value=c; o.textContent=c; catSel.appendChild(o);
+  }
+});
+
+const qInput=document.getElementById("q");
+const expSel=document.getElementById("expSel");
+qInput.addEventListener("input",()=>{state.q=qInput.value.trim().toLowerCase(); render();});
+catSel.addEventListener("change",()=>{state.cat=catSel.value; render();});
+expSel.addEventListener("change",()=>{state.exp=expSel.value; render();});
+document.getElementById("resetBtn").addEventListener("click",()=>{
+  state.q=""; state.cat=""; state.exp="";
+  qInput.value=""; catSel.value=""; expSel.value=""; render();
+});
+
+function postMatch(p){
+  if(state.cat && p.cat!==state.cat) return false;
+  if(state.exp && p.exp!==state.exp) return false;
+  if(state.q){
+    const hay=(p.title+" "+p.cat+" "+p.goods+" "+p.angle+" "+p.kw.join(" ")+" "+p.cta).toLowerCase();
+    if(!hay.includes(state.q)) return false;
+  }
+  return true;
+}
+
+/* 建群組（下拉式選單） */
+const groupsEl=document.getElementById("groups");
+function buildGroups(){
+  groupsEl.innerHTML="";
+  CAT_ORDER.forEach(cat=>{
+    const list=POSTS.filter(p=>p.cat===cat);
+    if(!list.length) return;
+    const hiN=list.filter(p=>p.exp==="高").length;
+    const det=document.createElement("details"); det.className="grp"; det.dataset.cat=cat;
+    const col=CAT_COLOR[cat]||["#2563eb","#eef3ff"];
+    det.style.setProperty("--c", col[0]); det.style.setProperty("--cs", col[1]);
+    const sum=document.createElement("summary");
+    sum.innerHTML=`<span class="chev"></span><span class="grp-name">${cat}</span><span class="grp-count">${list.length} 則</span><span class="grp-bar"></span>${hiN?`<span class="grp-hi">${hiN} 高曝光</span>`:""}`;
+    const body=document.createElement("div"); body.className="grp-body";
+    list.forEach(p=>{
+      const post=document.createElement("div"); post.className="post"; post.dataset.id=p.id;
+      const badge=p.exp==="高"?`<span class="badge hi">高曝光</span>`:`<span class="badge mid">中曝光</span>`;
+      const tags=p.kw.map(k=>`<span data-raw="${k.toLowerCase()}">${k}</span>`).join("");
+      const hasShort=!!SHORTS[p.id];
+      const seg=hasShort?`<div class="seg"><button class="seg-b on" type="button" data-mode="full">完整貼文</button><button class="seg-b" type="button" data-mode="story">限動短版</button></div>`:"";
+      post.innerHTML=`
+        <div class="preview">
+          <div class="pv-top"><span class="pv-brand">Apple Shop 高雄右昌</span>${badge}</div>
+          <div class="pv-title">${p.title}</div>
+        </div>
+        <div class="post-body">
+          <div class="post-meta">${p.angle}　·　可帶出 ${p.goods}</div>
+          ${seg}
+          <div class="caption"></div>
+          <div class="post-actions">
+            <button class="act primary copycap" type="button">複製完整貼文</button>
+            <button class="act mkimg" type="button">做成貼文圖</button>
+          </div>
+          <div class="tags">${tags}</div>
+        </div>`;
+      const capEl=post.querySelector(".caption");
+      const copyBtn=post.querySelector(".copycap");
+      let mode="full";
+      function refresh(){
+        capEl.textContent = (mode==="story" && hasShort) ? SHORTS[p.id] : CAPTIONS[p.id];
+        copyBtn.textContent = (mode==="story") ? "複製限動短版" : "複製完整貼文";
+      }
+      refresh();
+      if(hasShort){
+        post.querySelectorAll(".seg-b").forEach(b=>b.addEventListener("click",()=>{
+          mode=b.dataset.mode;
+          post.querySelectorAll(".seg-b").forEach(x=>x.classList.toggle("on", x===b));
+          refresh();
+        }));
+      }
+      copyBtn.addEventListener("click",e=>{
+        const txt = (mode==="story" && hasShort) ? SHORTS[p.id] : CAPTIONS[p.id];
+        navigator.clipboard.writeText(txt).then(()=>{e.target.textContent="已複製 ✓"; e.target.classList.add("done"); setTimeout(()=>{refresh(); e.target.classList.remove("done");},1500);});
+      });
+      post.querySelector(".mkimg").addEventListener("click",e=>{ openGenModal(p); });
+      body.appendChild(post);
+    });
+    det.appendChild(sum); det.appendChild(body);
+    groupsEl.appendChild(det);
+  });
+}
+
+/* 關鍵字索引 */
+const idxBody=document.getElementById("idxBody");
+function buildIndex(){
+  idxBody.innerHTML="";
+  Object.entries(KEYWORDS).forEach(([group,words])=>{
+    const g=document.createElement("div"); g.className="idx-group";
+    const w=words.map(x=>`<span data-raw="${x.toLowerCase()}">${fixCase(x)}</span>`).join("");
+    g.innerHTML=`<h3>${group}<em>${words.length}</em></h3><div class="idx-words">${w}</div>`;
+    idxBody.appendChild(g);
+  });
+}
+
+function render(){
+  let shown=0;
+  document.querySelectorAll(".grp").forEach(det=>{
+    let groupShown=0;
+    det.querySelectorAll(".post").forEach(post=>{
+      const p=POSTS.find(x=>x.id==post.dataset.id);
+      const ok=postMatch(p);
+      post.hidden=!ok;
+      if(ok){ groupShown++; shown++; }
+      // 關鍵字高亮
+      post.querySelectorAll(".tags span").forEach(s=>{
+        s.classList.toggle("hit", !!state.q && s.dataset.raw.includes(state.q));
+      });
+    });
+    det.hidden=groupShown===0;
+    // 有搜尋或單選產品線時自動展開命中的群組
+    if(groupShown>0 && (state.q || state.cat || state.exp)) det.open=true;
+    else if(!state.q && !state.cat && !state.exp) det.open=false;
+  });
+  document.getElementById("empty").hidden = shown>0;
+  const f=(state.q||state.cat||state.exp);
+  document.getElementById("resultline").textContent = f ? `符合 ${shown} / ${POSTS.length} 則` : `共 ${POSTS.length} 則貼文，點產品線展開`;
+
+  // 索引高亮 + 過濾
+  document.querySelectorAll("#idxBody .idx-group").forEach(g=>{
+    let any=false;
+    g.querySelectorAll(".idx-words span").forEach(s=>{
+      const hit=state.q && s.dataset.raw.includes(state.q);
+      s.classList.toggle("hit", !!hit); if(hit) any=true;
+    });
+    g.hidden = state.q && !any;
+  });
+}
+
+/* 產品線 → 內建出圖面板的分類／hashtag 對照 */
+const GEN_CAT = {"iPhone":"iphone","換機備份":"iphone","拍照修圖":"iphone","配件":"iphone","iCloud帳號":"iphone","iPad":"mac","Mac":"mac","Apple Watch":"watch","AirPods":"airpods","門市優惠":"season","季節":"season","在地服務":"iphone"};
+const GEN_TAG = {"iPhone":"#iPhone教學","換機備份":"#換機資料轉移","拍照修圖":"#iPhone攝影","iPad":"#iPad選購","Mac":"#MacBook選購","Apple Watch":"#AppleWatch","AirPods":"#AirPods","配件":"#Apple配件","iCloud帳號":"#iCloud","門市優惠":"#AppleDay優惠","季節":"#暑假出遊","在地服務":"#高雄楠梓"};
+
+/* ════════ 嵌入式貼文宣傳圖產生器引擎（與獨立產生器同源） ════════ */
+const CATS = {
+  iphone : {m:'#005CE6', bg:'#EBF2FF'},
+  airpods: {m:'#6B23CF', bg:'#F2EBFF'},
+  watch  : {m:'#00894B', bg:'#E6F7EF'},
+  mac    : {m:'#D43600', bg:'#FCEEE8'},
+  season : {m:'#CC7F00', bg:'#FFF4E0'},
+};
+/* 圖示自動配對：在 標題＋副標＋hashtag＋商品 找關鍵字，越上面越優先（有邏輯） */
+const ICON_RULES = [
+  {kw:['舊換新','以舊換新','回收','估價','折抵'], icon:'ph-arrows-clockwise'},
+  {kw:['電池','續航','耗電','不耐','膨脹'], icon:'ph-battery-charging-vertical'},
+  {kw:['magsafe','磁吸','磁力','吸附'], icon:'ph-magnet'},
+  {kw:['充電孔','充電線','充電頭','接觸不良','進水'], icon:'ph-plug'},
+  {kw:['快充','充電器','充電'], icon:'ph-lightning'},
+  {kw:['修圖','去除','路人','雜物','橡皮擦','智慧消除'], icon:'ph-eraser'},
+  {kw:['拍照','相機','攝影','照片','鏡頭','構圖','人像','夜拍','夜景','出遊'], icon:'ph-camera'},
+  {kw:['錄影','影片','剪片','電影級','vlog'], icon:'ph-video-camera'},
+  {kw:['截圖','螢幕錄影','長截圖'], icon:'ph-selection'},
+  {kw:['鈴聲','音樂','歌'], icon:'ph-music-notes'},
+  {kw:['降噪','耳機','聆聽','通話','翻譯','助聽','airpods'], icon:'ph-headphones'},
+  {kw:['清潔','清洗','保養'], icon:'ph-sparkle'},
+  {kw:['維修','保固','applecare','送修','故障'], icon:'ph-shield-check'},
+  {kw:['健康','心率','睡眠','久坐','血氧','偵測','監測','呼吸中止'], icon:'ph-heartbeat'},
+  {kw:['錶帶','穿搭','造型','搭配','換色','時尚'], icon:'ph-palette'},
+  {kw:['手錶','apple watch','試戴','series','ultra','錶'], icon:'ph-watch'},
+  {kw:['筆記','手寫','pencil','書寫','做筆記'], icon:'ph-note-pencil'},
+  {kw:['繪圖','畫畫','procreate','插畫'], icon:'ph-paint-brush'},
+  {kw:['ipad','平板'], icon:'ph-device-tablet'},
+  {kw:['備份','資料轉移','換機','搬'], icon:'ph-cloud-arrow-up'},
+  {kw:['icloud','容量','儲存空間'], icon:'ph-cloud'},
+  {kw:['apple id','帳號','密碼','登入','雙重驗證','安全'], icon:'ph-lock-key'},
+  {kw:['windows','換到 mac','切換','上手','從 win'], icon:'ph-swap'},
+  {kw:['macbook','筆電','mac ','電腦','報告','文書','備課','開機'], icon:'ph-laptop'},
+  {kw:['開學','學生','書包','裝備','新學期','大學生','上課'], icon:'ph-backpack'},
+  {kw:['教育價','教育優惠','學生證','學生方案'], icon:'ph-graduation-cap'},
+  {kw:['分期','零利率','apple day','折扣','優惠','省','疊','特價','最低價','現折'], icon:'ph-seal-percent'},
+  {kw:['比較','對照','還是','vs','怎麼選','選哪','哪款','哪台'], icon:'ph-arrows-left-right'},
+  {kw:['值得','值不值','該買','抉擇','評估'], icon:'ph-scales'},
+  {kw:['隱藏功能','新功能','技巧','設定'], icon:'ph-lightbulb'},
+  {kw:['推薦','首選','最佳'], icon:'ph-star'},
+  {kw:['保護貼','貼膜','氣泡'], icon:'ph-shield'},
+];
+const CAT_FALLBACK = {iphone:'ph-device-mobile', airpods:'ph-headphones', watch:'ph-watch', mac:'ph-laptop', season:'ph-seal-percent'};
+function pickIcon(c){
+  if(c.iconOverride) return c.iconOverride;
+  const hay=((c.title||'')+' '+(c.sub||'')+' '+(c.tag||'')+' '+(c._extra||'')).toLowerCase();
+  for(const r of ICON_RULES){ if(r.kw.some(k=>hay.includes(k.toLowerCase()))) return r.icon; }
+  return CAT_FALLBACK[c.cat]||'ph-device-mobile';
+}
+const SVG_CACHE={};
+function bare(n){ return n.replace(/^ph-/,''); }
+async function fetchIcon(name){
+  const b=bare(name);
+  if(SVG_CACHE[b]!==undefined) return SVG_CACHE[b];
+  SVG_CACHE[b]='';
+  try{
+    const r=await fetch(`https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/bold/${b}-bold.svg`);
+    if(r.ok){ const t=await r.text(); SVG_CACHE[b]=t.replace(/^[\s\S]*?<svg[^>]*>/i,'').replace(/<\/svg>[\s\S]*$/i,''); }
+  }catch(e){}
+  return SVG_CACHE[b];
+}
+function iconMarkup(name){
+  const b=bare(name);
+  if(SVG_CACHE[b]) return `<svg class="picon" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" fill="#fff">${SVG_CACHE[b]}</svg>`;
+  return `<i class="ph-bold ${name}"></i>`;
+}
+/* 標題自動斷成兩行（取最接近中間的標點切點） */
+function splitTitle(t){
+  if(t.includes('\n')) return t;
+  const ch=[...t]; let best=-1, mid=ch.length/2;
+  for(let i=2;i<ch.length-1;i++){ if('，、？！。：'.includes(ch[i])){ if(best<0||Math.abs(i-mid)<Math.abs(best-mid)) best=i; } }
+  if(best>0) return ch.slice(0,best+1).join('')+'\n'+ch.slice(best+1).join('');
+  if(ch.length>9){ const m=Math.ceil(ch.length/2); return ch.slice(0,m).join('')+'\n'+ch.slice(m).join(''); }
+  return t;
+}
+function postToGenCard(p){
+  return {cat:GEN_CAT[p.cat]||'iphone', title:splitTitle(p.title), sub:p.cta, tag:(GEN_TAG[p.cat]||'#高雄右昌AppleShop'), iconOverride:'', _extra:(p.kw||[]).join(' ')+' '+(p.goods||'')};
+}
+function posterHTML(c, mode){
+  const p=CATS[c.cat]||CATS.iphone;
+  const titleHTML=(c.title||'').split('\n').join('<br>');
+  const icon=pickIcon(c);
+  const head=`<div class="p-head"><div class="brand"><span class="dot" style="background:${p.m}"></span><span class="name">Apple Shop 高雄右昌</span></div></div>`;
+  const title=`<div class="p-title">${titleHTML}</div>`;
+  const sub=`<div class="p-sub">${c.sub||''}</div>`;
+  const panel=`<div class="p-panel" style="background:${p.m}">${iconMarkup(icon)}</div>`;
+  const foot=`<div class="p-foot"><div class="addr">高雄楠梓德民路837號<br><b>Apple Shop · 2樓</b></div><span class="tag-chip" style="color:${p.m};border-color:${p.m}">${c.tag||''}</span></div>`;
+  if(mode==='wide'||mode==='gbp'){
+    const cls=mode==='gbp'?'gbp':'wide';
+    return `<div class="poster ${cls}" style="background:${p.bg}"><div class="p-col">${head}${title}${sub}${foot}</div>${panel}</div>`;
+  }
+  return `<div class="poster" style="background:${p.bg}">${head}${title}${sub}${panel}${foot}</div>`;
+}
+/* 匯出圖片 */
+let _fontCSS;
+async function getFontCSSOnce(node){
+  if(_fontCSS!==undefined) return _fontCSS;
+  try{ _fontCSS=await Promise.race([htmlToImage.getFontEmbedCSS(node), new Promise((_,r)=>setTimeout(()=>r('t'),8000))]); }
+  catch(e){ _fontCSS=''; }
+  return _fontCSS;
+}
+async function nodeToImg(node, fmt){
+  const base={pixelRatio:2, cacheBust:true};
+  const draw=opt=> fmt==='jpg' ? htmlToImage.toJpeg(node,{...opt,quality:0.92}) : htmlToImage.toPng(node,opt);
+  try{ const css=await getFontCSSOnce(node); return await draw({...base, fontEmbedCSS:css}); }
+  catch(e){ return await draw({...base, skipFonts:true}); }
+}
+
+/* ───── 產生器面板（modal）連動 ───── */
+const POSTER_DIM={wide:[1200,900], square:[1080,1080], gbp:[1200,675]};
+const genState={mode:'square', fmt:'png', post:null};
+const genModal=document.getElementById('genModal');
+const genScaler=document.getElementById('genScaler');
+const genFrame=document.getElementById('genFrame');
+const genStatus=document.getElementById('genStatus');
+function renderGenPreview(){
+  const p=genState.post; if(!p) return;
+  const card=postToGenCard(p);
+  genScaler.innerHTML=posterHTML(card, genState.mode);
+  const [w,h]=POSTER_DIM[genState.mode];
+  if(genState.mode==='square'){
+    const titleEl=genScaler.querySelector('.p-title');
+    if(titleEl){ const maxLen=Math.max(...(card.title||'').split('\n').map(l=>[...l].length));
+      titleEl.style.fontSize = maxLen<=8?'76px':maxLen<=10?'66px':maxLen<=12?'58px':'50px'; }
+  }
+  const pw=Math.min(560, window.innerWidth-90);
+  genFrame.style.width=pw+'px'; genFrame.style.height=(pw*h/w)+'px';
+  genScaler.style.transform='scale('+(pw/w)+')';
+}
+async function openGenModal(p){
+  genState.post=p; genStatus.textContent='';
+  genModal.hidden=false; document.body.style.overflow='hidden';
+  renderGenPreview();                       // 先用 fallback 圖示秒開
+  await fetchIcon(pickIcon(postToGenCard(p)));  // 抓 inline SVG（匯出穩定）
+  renderGenPreview();
+}
+function closeGenModal(){ genModal.hidden=true; document.body.style.overflow=''; }
+function genFileName(){
+  const p=genState.post;
+  const r=genState.mode==='wide'?'1200x900':genState.mode==='gbp'?'1200x675':'1080x1080';
+  return `右昌AppleShop_${String(p.id).padStart(2,'0')}_${p.cat}_${r}.${genState.fmt}`;
+}
+async function downloadGen(){
+  if(typeof htmlToImage==='undefined'){ genStatus.textContent='需連網載入工具，請連網後重試'; return; }
+  const node=genScaler.firstElementChild; if(!node) return;
+  genStatus.textContent='產生中…';
+  try{
+    const url=await nodeToImg(node, genState.fmt);
+    const a=document.createElement('a'); a.href=url; a.download=genFileName(); a.click();
+    genStatus.textContent='已下載 ✓';
+  }catch(e){ genStatus.textContent='失敗，請重試'; console.error(e); }
+}
+document.getElementById('genClose').addEventListener('click', closeGenModal);
+genModal.addEventListener('click', e=>{ if(e.target===genModal) closeGenModal(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !genModal.hidden) closeGenModal(); });
+document.getElementById('genModeSeg').addEventListener('click', e=>{
+  const b=e.target.closest('button[data-m]'); if(!b) return;
+  genState.mode=b.dataset.m;
+  [...e.currentTarget.querySelectorAll('button')].forEach(x=>x.classList.toggle('on', x===b));
+  renderGenPreview();
+});
+document.getElementById('genFmtSeg').addEventListener('click', e=>{
+  const b=e.target.closest('button[data-f]'); if(!b) return;
+  genState.fmt=b.dataset.f;
+  [...e.currentTarget.querySelectorAll('button')].forEach(x=>x.classList.toggle('on', x===b));
+});
+document.getElementById('genDownload').addEventListener('click', downloadGen);
+window.addEventListener('resize', ()=>{ if(!genModal.hidden) renderGenPreview(); });
+
+buildGroups();
+buildIndex();
+render();
+
+/* 全部展開／收合 */
+const toggleAllBtn=document.getElementById("toggleAll");
+toggleAllBtn.addEventListener("click",()=>{
+  const dets=[...document.querySelectorAll(".grp")].filter(d=>!d.hidden);
+  const anyClosed=dets.some(d=>!d.open);
+  dets.forEach(d=>d.open=anyClosed);
+  toggleAllBtn.textContent=anyClosed?"全部收合":"全部展開";
+});
+/* 預設展開第一個產品線，畫面不空 */
+const firstGrp=document.querySelector(".grp");
+if(firstGrp) firstGrp.open=true;
+
+/* 預抓所有貼文會用到的圖示：產生器面板秒開、匯出穩定 */
+(async()=>{
+  try{ if(document.fonts && document.fonts.ready) await document.fonts.ready; }catch(e){}
+  const need=new Set();
+  POSTS.forEach(p=>need.add(pickIcon(postToGenCard(p))));
+  Object.values(CAT_FALLBACK).forEach(v=>need.add(v));
+  await Promise.all([...need].map(fetchIcon));
+})();
+</script>
+</body>
+</html>
